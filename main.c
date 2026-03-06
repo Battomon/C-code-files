@@ -74,12 +74,29 @@ void enqueue(SLLNode **front, SLLNode **rear, Cat *cat)
     else
     {
         // Traverse the queue until the current cat's arrival time is less than the new cat's arrival time
-        while(*rear != NULL && (*rear)->cat->arrival <= cat->arrival) 
-            rear = &(*rear)->next;
-        
-        // insert the new cat in the correct position
-        newNode->next = *rear;
-        *rear = newNode;
+        SLLNode *curr = *front;
+    SLLNode *prev = NULL;
+
+    // walk until we find a cat with a larger arrival time or reach end
+    while (curr != NULL && curr->cat->arrival <= cat->arrival) {
+        prev = curr;
+        curr = curr->next;
+    }
+
+    if (prev == NULL) {
+        // this should not happen since we handled front insertion above, but
+        // we'll treat it as inserting at front just in case
+        newNode->next = *front;
+        *front = newNode;
+    } else {
+        // insert after prev
+        prev->next = newNode;
+        newNode->next = curr;
+        if (prev == *rear) {
+            // inserted at end of queue
+            *rear = newNode;
+        }
+    }
     }
 }
 
@@ -151,6 +168,8 @@ int main()
 
     // create an array for the names of the cats that Dr. Dos treated
     char **drDosCats = (char**)malloc(numCats * sizeof(char*));
+    for(int i = 0; i < numCats; i++)
+        drDosCats[i] = (char*)malloc(26 * sizeof(char)); // max name length is 25 characters (plus the null terminator)
     int ddCnt = 0; // number of cats treated by Dr. Dos
 
     while (queueIsEmpty(&front, &rear) == 0) 
