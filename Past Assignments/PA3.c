@@ -50,6 +50,7 @@ Cat* createCat(int arrival, char *name, int duration)
     newCat->name = (char*)malloc((strlen(name) + 1) * sizeof(char));
     strcpy(newCat->name, name);
     newCat->duration = duration;
+
     return newCat;
 }
 
@@ -157,6 +158,8 @@ int main()
 
         scanf("%s", name);
         scanf("%d", &duration);
+        if(duration == 0)
+            continue; // skip cats that require no treatment time
         Cat *newCat = createCat(arrival, name, duration);
         numCats++;
 
@@ -165,6 +168,7 @@ int main()
     }
 
     int drUnoAv = 0; // Dr Uno's next avaialable appointment time
+    int drDosAv = 0; // Dr Dos's next avaialable appointment time
 
     // create an array for the names of the cats that Dr. Dos treated
     char **drDosCats = (char**)malloc(numCats * sizeof(char*));
@@ -176,20 +180,40 @@ int main()
     {
          Cat *cat = dequeue(&front, &rear);
 
-        if (cat != NULL && cat->arrival + cat->duration <= operatingHours && cat->arrival >= drUnoAv)
+        if (cat != NULL && cat->arrival + cat->duration <= operatingHours)
         {
-            printf("Doctor Uno treated %s at %d\n", cat->name, cat->arrival);
-            drUnoAv = cat->arrival + cat->duration;
-        }
-        else if (cat != NULL && cat->arrival + cat->duration <= operatingHours)
-        {
-            printf("Doctor Dos treated %s at %d\n", cat->name, cat->arrival);
-            // add the cat's name to the array of cats treated by Dr. Dos
-            strcpy(drDosCats[ddCnt++], cat->name);
+            if(cat->arrival >= drUnoAv) 
+            {
+                printf("Doctor Uno treated %s at %d\n", cat->name, cat->arrival);
+                drUnoAv = cat->arrival + cat->duration;
+            } 
+            else if(cat->arrival < drUnoAv && drUnoAv <= drDosAv)
+            {
+                printf("Doctor Uno treated %s at %d\n", cat->name, drUnoAv);
+                drUnoAv = drUnoAv + cat->duration;
+            }
+            else if(cat->arrival >= drDosAv)
+            {
+                printf("Doctor Dos treated %s at %d\n", cat->name, cat->arrival);
+                drDosAv = cat->arrival + cat->duration;
+                strcpy(drDosCats[ddCnt++], cat->name);
+            }
+            else if(cat->arrival < drDosAv && drDosAv <= drUnoAv)
+            {
+                printf("Doctor Dos treated %s at %d\n", cat->name, drDosAv);
+                drDosAv = drDosAv + cat->duration;
+                strcpy(drDosCats[ddCnt++], cat->name);
+            }
+
         }
         else if (cat != NULL)
         {
             printf("Cannot accommodate %s\n", cat->name);
+        }
+        if (cat != NULL) 
+        {
+            free(cat->name); // Free the inner string first
+            free(cat);       // Then free the struct
         }
     }
 
@@ -202,20 +226,10 @@ int main()
     } 
     else
         printf("No Exposed Cats\n");
-}
-/*
-queueFree(SLLNode **front, SLLNode **rear)
-{
-    // free all memory associated with the queue
-    while (!queueIsEmpty(front, rear)) {
-        Cat *cat = dequeue(front, rear);
-        freeCat(cat);
-    }
-}
 
-freeCat(Cat *cat)
-{
-    free(cat->name);
-    free(cat);
+    for(int i = 0; i < numCats; i++) {
+        free(drDosCats[i]);
+    }
+    free(drDosCats);
+    return 0;
 }
-*/
