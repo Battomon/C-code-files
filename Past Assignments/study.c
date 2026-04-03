@@ -1,5 +1,10 @@
 #include <stdlib.h>
-#include <stdio.h>
+
+typedef struct
+{
+    int top;
+    int array[10];
+} arrayStack;
 
 typedef struct Node
 {
@@ -7,56 +12,131 @@ typedef struct Node
     struct Node *next;
 } Node;
 
-typedef struct Queue
+typedef struct
+{
+    int top;
+    Node *head;
+} linkListStack;
+
+typedef struct
 {
     Node *front;
     Node *back;
-} Queue;
+} linkedListQueue;
 
-int enqueue(Queue *q, int data)
+
+
+
+arrayStack* pushArray(arrayStack *stack, int data)
 {
-    // create a new node
-    Node *temp = malloc(sizeof(Node));
+    if(stack->top = 10)
+    {
+        printf("stack overflow! stack too full.");
+        return stack;
+    }
+    stack->array[stack->top++] = data;
+    return stack;
+}
+
+int popArray(arrayStack *stack)
+{
+    if(stack->top < 0)
+    {
+        printf("stack overflow! Stack empty.");
+        return;
+    }
+    return stack->array[stack->top--];
+}
+
+
+pushLinkList(linkListStack *stack, int data)
+{
+    if(stack->top == 0)
+    {
+        stack->head->data = data;
+        stack->top++;
+        return stack;
+    }
+
+    Node *temp = stack->head;
+
+    int index;
+    while(temp->next != NULL)
+    {
+        temp = temp->next;
+        index++;
+    }
     temp->data = data;
-    temp->next = NULL;
+    stack->top = index;
+    return stack;
+}
 
-    // if there is a tail, connect that tail to this new node
-    if(q->back != NULL)
-        q->back->next = temp;
-    q->back = temp;
+popLinkList(linkListStack *stack)
+{
+    if(stack->top < 0 || stack->head)
+    {
+        printf("stack overflow! stack empty.");
+        return;
+    }
 
-    // make sure the head still makes sense
-    if(q->front == NULL)
-        q->front = temp;
+    Node *temp = stack->head;
+
+    while(temp->next)
+        temp = temp->next;
+
+    int data = temp->data;
+    stack->top--;
+
+    free(temp->next);
+    return data;
     
-    free(temp);
+
+}
+
+
+
+
+
+enquque(int data, linkedListQueue *queue)
+{
+    Node *newNode = malloc(sizeof(Node));
+    if(!newNode)
+    {
+        printf("memory not allocated properly");
+        return -1;
+    }
+
+    newNode->data = data;
+
+    if(queue->back == NULL)
+    {
+        queue->front = newNode;
+        queue->back = newNode;
+        return;
+    }
+
+    queue->back->next = newNode;
+    queue->back = newNode;
     return;
 }
 
-int deQueue(Queue *q)
+dequeue(linkedListQueue *queue)
 {
-    int result;
+    if(queue->front == NULL)
+    {
+        printf("queue empty");
+        return -1;
+    }
 
-    if(q == NULL) // check if q even exists
-        return;
+    Node *temp = queue->front;
 
-    if(q->front == NULL) // check if there is a node to take
-        return;
+    int data = temp->data;
 
-    Node *temp = q->front;
-    
-    result = temp->data;
-    q->front = q->front->next;
-    if(q->front == NULL)
-        q->back == NULL; // if front reaches the end, make sure the back is there!
+    queue->front = temp->next;
+    if(queue->front == NULL)
+        queue->back = NULL;
     
     free(temp);
-    return result;
+    return data;
 }
 
-
-
-int main()
-{
-
-}
